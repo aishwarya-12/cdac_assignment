@@ -1,0 +1,105 @@
+Q1.
+Create Employee table
+1. Create table emp(
+Empid int,
+Emp_salary int,
+Emp_lastname varchar,
+Emp_firstname text,
+Emp_dob date,
+Emp_deptno int,
+Emp_comm float,
+Primary key((Empid,Emp_salary),Emp_firstname,emp_dob));
+
+INSERT INTO emp (Empid, Emp_salary, Emp_lastname, Emp_firstname, Emp_dob, Emp_deptno, Emp_comm)
+VALUES (1001, 5000, 'Sharma', 'Rajan', '1999-11-11', 10, 2000.5);
+
+INSERT INTO emp (Empid, Emp_salary, Emp_lastname, Emp_firstname, Emp_dob, Emp_deptno, Emp_comm)
+VALUES (1001, 8000, 'Sharma', 'Rajan', '1999-11-11', 20, 1500.0);
+
+INSERT INTO emp (Empid, Emp_salary, Emp_lastname, Emp_firstname, Emp_dob, Emp_deptno, Emp_comm)
+VALUES (1001, 6000, 'Sharma', 'Ankit', '2000-05-20', 30, 1000.0);
+
+INSERT INTO emp (Empid, Emp_salary, Emp_lastname, Emp_firstname, Emp_dob, Emp_deptno, Emp_comm)
+VALUES (1002, 7000, 'Verma', 'Sahil', '1998-02-14', 15, 1200.0);
+
+INSERT INTO emp (Empid, Emp_salary, Emp_lastname, Emp_firstname, Emp_dob, Emp_deptno, Emp_comm)
+VALUES (1002, 5000, 'Verma', 'Ritika', '1999-07-19', 12, 900.0);
+
+INSERT INTO emp (Empid, Emp_salary, Emp_lastname, Emp_firstname, Emp_dob, Emp_deptno, Emp_comm)
+VALUES (1003, 10000, 'Patel', 'Meena', '1997-10-10', 40, 3000.0);
+
+INSERT INTO emp (Empid, Emp_salary, Emp_lastname, Emp_firstname, Emp_dob, Emp_deptno, Emp_comm)
+VALUES (1003, 12000, 'Patel', 'Jay', '1996-01-01', 50, 3500.0);
+
+INSERT INTO emp (Empid, Emp_salary, Emp_lastname, Emp_firstname, Emp_dob, Emp_deptno, Emp_comm)
+VALUES (1004, 4500, 'Rao', 'Neha', '2001-03-25', 18, 800.0);
+
+INSERT INTO emp (Empid, Emp_salary, Emp_lastname, Emp_firstname, Emp_dob, Emp_deptno, Emp_comm)
+VALUES (1005, 9000, 'Iyer', 'Amit', '1995-06-06', 25, 2200.0);
+
+INSERT INTO emp (Empid, Emp_salary, Emp_lastname, Emp_firstname, Emp_dob, Emp_deptno, Emp_comm)
+VALUES (1005, 9500, 'Iyer', 'Kavita', '1994-08-08', 25, 2500.0);
+
+INSERT INTO emp (Empid, Emp_salary, Emp_lastname, Emp_firstname, Emp_dob, Emp_deptno, Emp_comm)
+VALUES (1006, 11000, 'Das', 'Manoj', '1993-12-12', 60, 2800.0);
+
+INSERT INTO emp (Empid, Emp_salary, Emp_lastname, Emp_firstname, Emp_dob, Emp_deptno, Emp_comm)
+VALUES (1007, 4000, 'Ghosh', 'Sneha', '2002-09-09', 14, 700.0);
+
+INSERT INTO emp (Empid, Emp_salary, Emp_lastname, Emp_firstname, Emp_dob, Emp_deptno, Emp_comm)
+VALUES (1008, 13000, 'Nair', 'Vikas', '1990-04-04', 70, 4000.0);
+
+INSERT INTO emp (Empid, Emp_salary, Emp_lastname, Emp_firstname, Emp_dob, Emp_deptno, Emp_comm)
+VALUES (1009, 14000, 'Pillai', 'Arun', '1989-05-05', 75, 4500.0);
+
+INSERT INTO emp (Empid, Emp_salary, Emp_lastname, Emp_firstname, Emp_dob, Emp_deptno, Emp_comm)
+VALUES (1010, 15000, 'Khan', 'Sara', '1992-07-07', 80, 5000.0);
+What is output of following query
+1. Select * from employee
+Where empid in (1001,1002)
+2. Select * from employee
+Where empid=1001 and emp_dob=’1999-11-11’ and emp_salary=5000 and
+emp_firstname=’Rajan’
+3. Select * from employee
+Where empid=1001 and emp_dob=’1999-11-11’ and emp_salary>2000 and
+emp_firstname=’Rajan’
+4. Select * from employee
+Where empid=1001 and emp_dob=’1999-11-11’ and emp_salary>5000 and
+emp_salary<15000
+5. Select * from employee
+Where empid=1001 and emp_dob=’1999-11-11’ and emp_salary>5000 and emp_dept>10
+6. Select * from employee
+Where empid=1001 and emp_dob=’1999-11-11’ and emp_salary>5000 and emp_dept>10
+ALLOW FILTERING;
+
+2. Create table to store information about singer, use appropriate collections to store data
+Sid and name will be primary key
+Sid integer, name string, store list of songs he/she sung(list<text>), store list of music directors
+names and how many songs he sung with the director(map<text,int>), store names of
+studios(map<text,int>) where recordings have been done and how many times recording has been
+done in the studio, also store movie name, director name <text> and total number of songs < int> in
+the movie he/she sung.
+
+CREATE TABLE singer (
+    Sid int,
+    name text,
+    songs list<text>,   
+    directors map<text, int>, 
+    studios map<text, int>, 
+    movies map<text, frozen<tuple<text, int>>>, 
+    PRIMARY KEY (Sid, name)
+);
+
+A. Write query to add new director name and count 1 in the table
+B. List all records of ‘sonu nigam’
+C. Add new studio in ‘shan’ and ‘shreya’s list
+D. Perform batch operation to insert 2 records and delete 1 record from above
+table
+E. Delete list of studios and movies from above table from ‘shan’ and ‘sonu nigam’s
+record.
+
+3. Create a data type to store information about server. For each server store id, name, ram
+capacity. Create a table location to store bldgname,floor number and list of servers on the
+floor. Building name is primary key and floor number is cluster key
+a. Find list of all servers from ‘A’ building and floor number > 5
+b. Find list of all servers from ‘A’,’B’,’C’ building.

@@ -1,0 +1,134 @@
+Following are the tables:
+BRANCH (BID INTEGER, BRNAME CHAR (30), BRCITY CHAR (10))
+
+create table branch (
+BID int primary key, 
+BRNAME char(30) not null,
+BRCITY char(10));
+
+insert into branch values (101, 'Deccan', 'Pune');
+insert into branch values (102, 'Aundh', 'Pune');
+insert into branch values (103, 'M.G ROAD', 'Mumbai');
+insert into branch values (104, 'Baner', 'Pune');
+insert into branch values (105, 'Kothrud', 'Pune');
+
+CUSTOMER (CNO INTEGER, CNAME CHAR (20), CADDR CHAR (35), CITY CHAR(20))
+
+create table customer(
+CNO int primary key,
+CNAME char(20) not null,
+CADDR char(35) not null,
+CITY char(20));
+
+insert into customer values (201, 'Ravi Kumar', 'Shivaji Nagar', 'Pune');
+insert into customer values (202, 'Sneha Joshi', 'Baner Road', 'Pune');
+insert into customer values (203, 'Amit Shah', 'MG Road', 'Mumbai');
+insert into customer values (204, 'Priya Nair', 'Aundh', 'Pune');
+insert into customer values (205, 'Vikram Patil', 'Kothrud', 'Pune');
+insert into customer values (206, 'Neha Singh', 'Deccan Gymkhana', 'Pune');
+insert into customer values (207, 'Rohan Mehta', 'Andheri', 'Mumbai');
+insert into customer values (208, 'Kavita Kulkarni', 'Baner', 'Pune');
+insert into customer values (209, 'Suresh Iyer', 'Borivali', 'Mumbai');
+insert into customer values (210, 'Anjali Deshpande', 'Aundh', 'Pune');
+
+
+LOAN_APPLICATION (LNO INTEGER, LAMTREQUIRED MONEY, LAMTAPPROVED MONEY, L_DATE DATE)
+
+create table loan_application(
+LNO int primary key,
+CUST_NO int,
+BRANCHID int,
+LAMTREQUIRED float not null,
+LAMTAPPROVED float ,
+L_DATE date,
+CONSTRAINT check_1 check (LAMTAPPROVED <= LAMTREQUIRED));
+
+insert into loan_application values (301, 201, 101, 500000, 450000, '2023-09-15');
+insert into loan_application values (302, 202, 104, 300000, 300000, '2023-08-10');
+insert into loan_application values (303, 203, 103, 700000, 600000, '2023-09-20');
+insert into loan_application values (304, 204, 102, 250000, 200000, '2023-07-25');
+insert into loan_application values (305, 205, 105, 400000, 400000, '2023-09-05');
+insert into loan_application values (306, 206, 101, 350000, 300000, '2023-09-12');
+insert into loan_application values (307, 207, 103, 800000, 700000, '2023-10-01');
+insert into loan_application values (308, 208, 104, 150000, 120000, '2023-09-30');
+insert into loan_application values (309, 209, 103, 600000, 500000, '2023-09-18');
+insert into loan_application values (310, 210, 102, 200000, 180000, '2023-09-07');
+insert into loan_application values (311, 201, 101, 100000, 95000,  '2023-08-02');
+insert into loan_application values (312, 202, 104, 220000, 200000, '2023-09-28');
+insert into loan_application values (313, 203, 103, 550000, 500000, '2023-09-11');
+
+TERNARY (BID INTEGER, CNO INTEGER, LNO INTEGER)
+
+create table ternary(
+B_ID int,
+C_NO int,
+L_NO int primary key,
+CONSTRAINT fk_branchid foreign key(B_ID) references BRANCH(BID)
+on delete cascade
+on update cascade,
+CONSTRAINT fk_custno foreign key(C_NO) references CUSTOMER(CNO)
+on delete cascade
+on update cascade,
+CONSTRAINT fk_loanno foreign key(L_NO) references LOAN_APPLICATION(LNO)
+on delete cascade
+on update cascade);
+
+insert into ternary values (101, 201, 301);
+insert into ternary values (104, 202, 302);
+insert into ternary values (103, 203, 303);
+insert into ternary values (102, 204, 304);
+insert into ternary values (105, 205, 305);
+insert into ternary values (101, 206, 306);
+insert into ternary values (103, 207, 307);
+insert into ternary values (104, 208, 308);
+insert into ternary values (103, 209, 309);
+insert into ternary values (102, 210, 310);
+insert into ternary values (101, 201, 311);
+insert into ternary values (104, 202, 312);
+insert into ternary values (103, 203, 313);
+
+Queries:
+1. Find the names of the customers for the “Aundh” branch.
+
+mysql> select c.cname, b.brname
+    -> from ternary t
+    -> join branch b on t.b_id = b.bid
+    -> join customer c on t.c_no = c.cno
+    -> where b.brname ='Aundh'; 
+
+2. List the names of the customers who have received loan less than their requirement.
+
+mysql> select c.cno, l.no, c.cname
+    -> from customer c, loan_application l
+    -> where c.cno = l.cust_no and lamtrequired > lamtapproved;
+
+3. Find the maximum loan amount approved.
+
+mysql> select max(lamtapproved) 'Maximum Loan Approved'
+    -> from loan_application;
+
+4. Find out the total loan amount sanctioned by “Deccan “branch.
+
+mysql> select b.brname,sum(l.lamtapproved) "Loan Amount Approved"
+    -> from loan_application l
+    -> join branch b on b.bid = l.branchid
+    -> group by b.brname
+    -> having b.brname ="Deccan"; 
+
+5. Count the number of loan applications received by “M.G.ROAD” branch.
+
+mysql> select b.brname, count(l.lno) 'Number of loan applications'
+    -> from loan_application l, branch b
+    -> where b.bid = l.branchid
+    -> group by b.brname
+    -> having b.brname = 'M.G Road';
+
+6. List the names of the customer along with the branch names who have applied for loan in the month of September.
+
+mysql> select c.cname, b.brname
+    -> from customer c
+    -> join ternary t on c.cno = t.c_no
+    -> join branch b on b.bid = t.b_id
+    -> join loan_application l on l.lno = t.l_no
+    -> where monthname(l_date) = 'September';
+

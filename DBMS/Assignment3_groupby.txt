@@ -1,0 +1,58 @@
+Assignment 3: Group Functions
+
+Product table
+(pid,pname,qty,price,mfgdate,expdate,type,cid)
+Type -→ perishable/non perishable
+All perishable products has expdate
+
+1. Find sum of price for all products 
+mysql> select sum(price) 'Total Price'
+    -> from product;
+
+2. Find min and max price for every category
+mysql> select cid, min(price), max(price)
+    -> from product
+    -> group by cid
+    -> order by cid;
+
+3. Find sum of total amt, for every type of product (amt=qty*price)
+mysql> select type, sum(qty*price) as 'TotalAmount'
+    -> from product
+    -> group by type;
+
+4. Find how many products and what is sum of prices of all products for every category
+mysql> select cid, count(pid) 'total_items', sum(price) 'total_price'
+    -> from product
+    -> group by cid;
+
+5. Display pid, pname, cid, sum of prices for every category
+
+
+6. Display sum of prices for every category, if it is perishable product
+mysql> select cid, sum(price) 'Total Price'
+    -> from product
+    -> where type ='perishable'
+    -> group by cid;
+
+7. Display sum of amt(qty*price) for every category if the qty > 45 and < 100
+mysql> select cid, sum(qty*price) 'AmountSum'
+    -> from product
+    -> where qty between 45 and 100
+    -> group by cid;
+
+8. Display number of products, sum of amt(price*qty) products, which are manufactured in year 2024, for every category, only if the number of products in the category are <3
+arrange it in sorted order of sum of amt(price*qty)
+mysql> select cid, count(pid) 'Number of products', sum(qty*price) 'Total Amount'
+    -> from product
+    -> where year(mfgdate) = '2024'
+    -> group by cid
+    -> having count(pid) < 3
+    -> order by 'Total Amount';
+
+9. Find sum and count of all products manufactured in every year (to find year-→ year(mfgdate))
+mysql> select year(mfgdate) 'year', count(pid) 'total', sum(price) 'total_sum'
+    -> from product
+    -> group by year(mfgdate)
+    -> order by year(mfgdate);
+
+10. Display pid, pname, type, count for every type

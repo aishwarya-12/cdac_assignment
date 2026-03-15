@@ -1,0 +1,241 @@
+Q1. PG accommodation
+Assumption : one flat is owned by one owner, one flat can be used by many customers
+Flats(flatno,bldgname,rooms,ownerid)
+
+create table Flats(
+flatno int primary key,
+bldgname varchar(20),
+rooms int,
+ownerid int,
+constraint fk_ownerid foreign key (ownerid) references Owner(ownerid)
+on delete cascade
+on update cascade);
+
+Customer(cno,cname,address,flatno)
+
+create table Customer(
+cno int primary key,
+cname varchar(20) not null,
+address varchar(20),
+flatno int unique,
+constraint fk_flatno foreign key (flatno) references Flats(flatno)
+on delete cascade
+on update cascade);
+
+Owner(ownerid,oname,mobile)
+create table Owner(
+ownerid int primary key,
+oname varchar(20),
+mobile varchar(20));
+
+1. List all customers along with flatno and building name
+
+mysql> select c.cno,c.cname,c.address,c.flatno,f.bldgname from customer c
+    -> left outer join flats f
+    -> on c.flatno = f.flatno; 
+
+2. List all flats which are vacant
+
+mysql> select * from flats f
+    -> where not exists ( select c.flatno  from customer c where c.flatno = f.flatno); 
+
+3. List the flat details along with owner names
+
+mysql> select f.flatno, f.bldgname, f.rooms, o.oname
+    -> from flats f, owner o
+    -> where f.ownerid = o.ownerid;
+
+4. Display flat details, owner details and customer details for all customers who has taken pg accommodation
+
+mysql> select c.cno, c.cname, c.address, c.flatno, f.bldgname,f.rooms,f.ownerid,o.oname,o.mobile from customer c
+    -> inner join flats f on c.flatno = f.flatno
+    -> inner join owner o on f.ownerid = o.ownerid
+    -> where c.flatno is not null; 
+
+5. List all customers who has not yet booked pg accommodation
+
+mysql> select c.cno, c.cname, c.address from customer c
+    -> left outer join flats f
+    -> on c.flatno = f.flatno
+    -> where c.flatno is null;
+
+
+Q2. Faculty course example
+Assumption : one faculty can conduct many courses,
+one course can be assigned to many faculties
+
+Faculty (fid, fname,address)
+
+mysql> create table faculty (
+    -> fid int primary key,
+    -> fname varchar(20) not null,
+    -> address varchar(50));
+
+Course(cid, cname,duration days)
+
+mysql> create table course(
+    -> cid int primary key,
+    -> cname varchar(20) not null,
+    -> duration varchar(15),
+    -> days varchar(10));
+
+Course-faculty(cid,fid,date of assignment)
+
+mysql> create table course_faculty(
+    -> cid int,
+    -> fid int,
+    -> date_of_assignment date,
+    -> primary key(cid,fid),
+    -> constraint fk_course foreign key (cid) references course(cid),
+    -> constraint fk_faculty foreign key (fid) references faculty(fid));
+
+1. Find all faculties who have course java assigned in may
+
+mysql> select f.fid, f.fname
+    -> from faculty f where exists 
+    -> (select cf.fid from course_faculty cf inner join course c on cf.cid = c.cid 
+    -> where cf.fid = f.fid and c.cname = 'Java');
+
+2. List all faculties for whom no course is assigned
+
+mysql> select * from faculty f
+    -> where not exists 
+    -> (select cf.fid from course_faculty cf inner join course c on c.cid = cf.cid 
+    -> where cf.fid = f.fid);
+
+3. List all courses for which no faculty is assigned
+
+mysql> select * from course c
+    -> where not exists
+    -> (select cf.cid from course_faculty cf inner join faculty f on f.fid = cf.fid
+    -> where cf.cid = c.cid);
+
+4. List all courses , faculty details who stays in either pune or Mumbai
+
+mysql> select c.cid, c.cname, f.fid, f.fname
+    -> from course_faculty cf inner join course c on cf.cid = c.cid inner join faculty f on cf.fid = f.fid where address in ('Pune','Mumbai');
+
+5. List all course details , faculty details for courses with duration > 30 days
+
+mysql>  select c.cid, c.cname, f.fid, f.fname
+    ->  from course_faculty cf inner join course c on cf.cid = c.cid inner join faculty f on cf.fid = f.fid where c.duration>30;
+
+6. List all faculties for whom no course is assigned also display faculty with courses assigned
+
+mysql> select * from faculty f
+    -> where not exists
+    -> (select cf.fid from course_faculty cf inner join course c on c.cid = cf.cid
+    -> where cf.fid = f.fid)
+    -> Union
+    -> select * from faculty f
+    -> where exists
+    -> (select cf.fid from course_faculty cf inner join course c on c.cid = cf.cid
+    -> where cf.fid = f.fid);
+
+
+
+Create a table
+Location(loc_id, lname,address)
+Server (sid,sname,configuration,lid, adminid)
+Admin(adminid,username,password,mobile,name)
+
+create table Location(
+loc_id int primary key,
+lname varchar(20) not null,
+address varchar(20));
+
+create table Server (
+sid int primary key,
+sname varchar(20) not null,
+configuration varchar(50),
+lid int, 
+adminid int,
+constraint fk_lid foreign key (lid) references Location(loc_id)
+on delete cascade
+on update cascade,
+constraint fk_adminid foreign key (adminid) references Admin(adminid)
+on delete cascade
+on update cascade);
+
+create table Admin(
+adminid int primary key,
+username varchar(20),
+password varchar(12),
+mobile varchar(10) unique,
+name varchar(20));
+
+1. display all server-name, location of the server
+
+mysql> select s.sname,l.lname
+    -> from server s, location l
+    -> where s.lid = l.loc_id;
+
+2. display all server-name, admin-name, admin mobile
+
+mysql> select s.sname, a.username 'admin-name', a.mobile 'admin-mobile'
+    -> from server s
+    -> inner join admin a
+    -> on s.adminid = a.adminid;
+
+3. display all server which are managed by admin rohit
+
+mysql> select * from server s
+    -> inner join admin a
+    -> on a.adminid = s.adminid
+    -> where a.name = 'rohit';
+
+4. display all server and the locations, for which admin is rohit
+
+mysql> select s.sname, l.lname
+    -> from server s
+    -> inner join location l on s.lid = l.loc_id
+    -> inner join admin a on s.adminid = a.adminid
+    -> where a.name = "rohit";
+
+5. display all admins, for whom no server is assigned
+
+mysql> select * from admin a
+    -> where not exists (select s.adminid
+    -> from server s
+    -> where s.adminid = a.adminid);
+
+6. display all servers and admin details, and also display admins for whom no server is assigned
+
+mysql> select s.sid, s.sname, s.configuration, s.adminid, a.username, a.password, a.mobile
+    -> from server s
+    -> inner join admin a on s.adminid = a.adminid
+    -> Union
+    -> select null,null,null,a.adminid, a.username,a.password,a.mobile from admin a
+    -> where not exists (select s.adminid
+    -> from server s
+    -> where s.adminid = a.adminid);
+
+7. display  servers, admins and location of the server
+
+mysql> select s.sid, s.sname, a.name, l.lname
+    -> from server s
+    -> inner join admin a on a.adminid = s.adminid
+    -> inner join location l on l.loc_id = s.lid;
+
+8. to display all admins for whom no server is assigned also display locations at which no server is placed
+
+mysql> select a.adminid, a.username, a.name, null as loc_id, null as loc_name, null as address from admin a
+    -> where not exists (select s.adminid
+    -> from server s
+    -> where s.adminid = a.adminid)
+    -> Union
+    -> select null, null, null, l.loc_id, l.lname, l.address from location l
+    -> where not exists (select s.lid from server s where s.lid = l.loc_id);
+
+9. display all servers for which no location is assigned
+
+mysql> select l.loc_id, l.lname, l.address from location l
+    -> where not exists (select s.lid from server s where s.lid = l.loc_id);
+
+10. display all servers, for which no location is assigned, whose admin is namrata
+
+mysql> select s.sid, s.sname, s.configuration from server s
+    -> inner join admin a on s.adminid = a.adminid
+    -> where not exists (select l.loc_id from location l where l.loc_id = s.lid) and a.name = 'namrata';
+
+    

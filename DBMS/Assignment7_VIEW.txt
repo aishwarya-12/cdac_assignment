@@ -1,0 +1,265 @@
+Assignment -7 
+
+-------to create view
+create view find_discount
+as
+select cname,vname,price,buying_price,price-buying_price “discount”
+from customer c inner join cust_vehicle cv on c.custid=cv.cid inner join vehicle v on
+v.vid=cv.vid
+
+--------to display discount
+select * from find_discount; 
+
+1. create all given tables.
+
+mysql> create table vehicle (
+    -> vid int primary key,
+    -> vname varchar(25),
+    -> price int,
+    -> description varchar(50));
+
+insert into vehicle values
+(1, 'Activa', 80000, 'ksldjfjksj'),
+(2, 'Santro', 800000, 'kdjfkjsd'),
+(3, 'Motor bike', 100000, 'fdkdfj');
+
+mysql> create table customer(
+    -> custid int primary key,
+    -> cname varchar(20),
+    -> address varchar(50));
+
+insert into customer values
+(1, 'Nilima', 'Pimpari'),
+(2, 'Ganesh', 'Pune'),
+(3, 'Pankaj','Mumbai');
+
+mysql> create table salesman(
+    -> sid int primary key,
+    -> sname varchar(20),
+    -> saddress varchar(50));
+
+insert into salesman values
+(10, 'Rajesh', 'mumbai'),
+(11, 'Seema', 'Pune'),
+(13, 'Rakhi', 'pune');
+
+mysql> create table cust_vehicle(
+    -> custid int,
+    -> vid int,
+    -> sid int,
+    -> buy_price float(10,2),
+    -> primary key(custid, vid),
+    -> constraint fk_customer foreign key(custid) references customer(custid)
+    -> on delete cascade
+    -> on update cascade,
+    -> constraint fk_vehicle foreign key(vid) references vehicle(vid)
+    -> on delete cascade
+    -> on update cascade,
+    -> constraint fk_salesman foreign key(sid) references salesman(sid)
+    -> on delete cascade
+    -> on update cascade);
+
+insert into cust_vehicle values
+(1 ,1 ,10 ,75000),
+(1, 2, 10, 790000),
+(2, 3, 11, 80000),
+(3, 3, 11, 75000);
+(3, 2, 10, 800000);
+
+2. create index on vehicle table based on price
+
+mysql> create index vehicle_index
+    -> on vehicle(price); 
+
+3. find all customer name,vehicle name, salesman name, discount earn by all customer
+
+mysql> select c.cname, v.vname, s.sname, (v.price - cv.buy_price) as "Discount"
+    -> from cust_vehicle cv
+    -> inner join vehicle v on cv.vid = v.vid
+    -> inner join customer c on cv.custid = c.custid
+    -> inner join salesman s on cv.sid = s.sid; 
+
+4. find all customer name,vehicle name,salesman name for all salesman who stays in pune
+
+mysql> select c.cname, v.vname, s.sname from cust_vehicle cv
+    -> inner join vehicle v on cv.vid = v.vid
+    -> inner join customer c on cv.custid = c.custid
+    -> inner join salesman s on cv.sid = s.sid
+    -> where s.saddress = 'pune';
+
+5. find how many customers bought motor bike
+
+mysql> select count(*) as "number of people bought motor bike" from customer c
+    -> where c.custid in (
+    -> select cv.custid from cust_vehicle cv
+    -> where cv.vid = (select v.vid from vehicle v where v.vname = 'Motor bike'));
+
+6. create a view find_discount which displays output
+
+mysql> create view find_discount
+    -> as
+    -> select c.cname, v.vname, s.sname, (v.price - cv.buy_price) as "Discount"
+    -> from cust_vehicle cv
+    -> inner join vehicle v on cv.vid = v.vid
+    -> inner join customer c on cv.custid = c.custid
+    -> inner join salesman s on cv.sid = s.sid;
+
+7. find all customer name, vehicle name, salesman name, discount earn by all customer
+
+mysql> select * from find_discount;
+
+or
+
+mysql> select c.cname, v.vname, s.sname, (v.price - cv.buy_price) as "Discount"
+    -> from cust_vehicle cv
+    -> inner join vehicle v on cv.vid = v.vid
+    -> inner join customer c on cv.custid = c.custid
+    -> inner join salesman s on cv.sid = s.sid;
+
+8. create view my_hr to display empno,ename,job,comm for all employees who earn commission
+
+mysql> create view my_hr
+    -> as
+    -> select empno,ename,job,comm
+    -> from emp
+    -> where comm is not null;
+
+9. create view mgr30 to display all employees from department 30
+
+mysql> create view mgr30
+    -> as
+    -> select *
+    -> from emp
+    -> where deptno = 30;
+
+10. insert 3 employees in view mgr30 check whether insertion is possible
+
+mysql> insert into mgr30 values ( 7824, 'MILI', 'ASSITANT', 7839, '2022-02-24',3678, 1000,30);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into mgr30 values ( 9821, 'VIJAY', 'ENGINEER', 7566, '2019-07-27',2078, 100,20);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into mgr30 values ( 7086, 'NILOY', 'ENGINEER', 7902, '2025-07-27',1648, 300,10);
+Query OK, 1 row affected (0.00 sec)
+
+all the three queries got inserted in emp table through view despite view only show record for those who 
+belongs to deptno 30, to limit the use of DML commands we need to give 'with check option' in view.
+
+11. insert 3 records in dept and display all records from dept
+
+
+mysql> insert into dept values
+    -> (50,'IT', 'NOIDA'),
+    -> (60,'FINANCE','MUMBAI'),
+    -> (70,'LAW','DELHI');
+
+mysql> select * from dept;
++--------+------------+----------+
+| DEPTNO | DNAME      | LOC      |
++--------+------------+----------+
+|     10 | ACCOUNTING | NEW YORK |
+|     20 | RESEARCH   | DALLAS   |
+|     30 | SALES      | CHICAGO  |
+|     40 | OPERATIONS | BOSTON   |
+|     50 | IT         | NOIDA    |
+|     60 | FINANCE    | MUMBAI   |
+|     70 | LAW        | DELHI    |
++--------+------------+----------+
+
+12. use rollback command check what happens
+
+mysql> rollback;
+mysql> select * from dept;
++--------+------------+----------+
+| DEPTNO | DNAME      | LOC      |
++--------+------------+----------+
+|     10 | ACCOUNTING | NEW YORK |
+|     20 | RESEARCH   | DALLAS   |
+|     30 | SALES      | CHICAGO  |
+|     40 | OPERATIONS | BOSTON   |
++--------+------------+----------+
+
+13. do the following
+	insert row in emp with empno 100
+	insert row in emp with empno 101
+	insert row in emp with empno 102
+	add savepoint A
+	insert row in emp with empno 103
+	insert row in emp with empno 104
+	insert row in emp with empno 105
+	add savepoint B
+	delete emp with empno 100
+	delete emp with emp no 104
+	rollback upto savepoint B
+	check what all records will appear in employee table
+
++-------+---------+-----------+------+------------+---------+---------+--------+
+| EMPNO | ENAME   | JOB       | MGR  | HIREDATE   | SAL     | COMM    | DEPTNO |
++-------+---------+-----------+------+------------+---------+---------+--------+
+|  7369 | SMITH   | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |
+|  7499 | ALLEN   | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |
+|  7521 | WARD    | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |
+|  7566 | JONES   | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |
+|  7654 | MARTIN  | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |
+|  7698 | BLAKE   | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |
+|  7782 | CLARK   | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |
+|  7788 | SCOTT   | ANALYST   | 7566 | 1982-12-09 | 3000.00 |    NULL |     20 |
+|  7839 | KING    | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |
+|  7844 | TURNER  | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |
+|  7876 | ADAMS   | CLERK     | 7788 | 1983-01-12 | 1100.00 |    NULL |     20 |
+|  7900 | JAMES   | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |
+|  7902 | FORD    | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |
+|  7934 | MILLER  | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |
+|   110 | meenall | clerk     | 7902 | 2020-11-11 | 4567.00 |  456.00 |     10 |
+|   101 | MILI    | ASSITANT  | 7839 | 2022-02-24 | 3678.00 | 1000.00 |     30 |
+|   102 | VIJAY   | ENGINEER  | 7566 | 2019-07-27 | 2078.00 |  100.00 |     20 |
+|   103 | NILOY   | ENGINEER  | 7902 | 2025-07-27 | 1648.00 |  300.00 |     10 |
+|   104 | RAHUL   | MANAGER   | 7839 | 2025-07-28 | 2850.00 |  400.00 |     20 |
+|   105 | SNEHA   | ANALYST   | 7566 | 2025-07-29 | 3000.00 |  500.00 |     30 |
+|   106 | AMIT    | CLERK     | 7788 | 2025-07-30 | 1200.00 |  200.00 |     40 |
++-------+---------+-----------+------+------------+---------+---------+--------+
+	
+	rollback upto A
+	check what all records will appear in employee table
+	commit all changes
+	check what all records will appear in employee table
++-------+---------+-----------+------+------------+---------+---------+--------+
+| EMPNO | ENAME   | JOB       | MGR  | HIREDATE   | SAL     | COMM    | DEPTNO |
++-------+---------+-----------+------+------------+---------+---------+--------+
+|  7369 | SMITH   | CLERK     | 7902 | 1980-12-17 |  800.00 |    NULL |     20 |
+|  7499 | ALLEN   | SALESMAN  | 7698 | 1981-02-20 | 1600.00 |  300.00 |     30 |
+|  7521 | WARD    | SALESMAN  | 7698 | 1981-02-22 | 1250.00 |  500.00 |     30 |
+|  7566 | JONES   | MANAGER   | 7839 | 1981-04-02 | 2975.00 |    NULL |     20 |
+|  7654 | MARTIN  | SALESMAN  | 7698 | 1981-09-28 | 1250.00 | 1400.00 |     30 |
+|  7698 | BLAKE   | MANAGER   | 7839 | 1981-05-01 | 2850.00 |    NULL |     30 |
+|  7782 | CLARK   | MANAGER   | 7839 | 1981-06-09 | 2450.00 |    NULL |     10 |
+|  7788 | SCOTT   | ANALYST   | 7566 | 1982-12-09 | 3000.00 |    NULL |     20 |
+|  7839 | KING    | PRESIDENT | NULL | 1981-11-17 | 5000.00 |    NULL |     10 |
+|  7844 | TURNER  | SALESMAN  | 7698 | 1981-09-08 | 1500.00 |    0.00 |     30 |
+|  7876 | ADAMS   | CLERK     | 7788 | 1983-01-12 | 1100.00 |    NULL |     20 |
+|  7900 | JAMES   | CLERK     | 7698 | 1981-12-03 |  950.00 |    NULL |     30 |
+|  7902 | FORD    | ANALYST   | 7566 | 1981-12-03 | 3000.00 |    NULL |     20 |
+|  7934 | MILLER  | CLERK     | 7782 | 1982-01-23 | 1300.00 |    NULL |     10 |
+|   110 | meenall | clerk     | 7902 | 2020-11-11 | 4567.00 |  456.00 |     10 |
+|   101 | MILI    | ASSITANT  | 7839 | 2022-02-24 | 3678.00 | 1000.00 |     30 |
+|   102 | VIJAY   | ENGINEER  | 7566 | 2019-07-27 | 2078.00 |  100.00 |     20 |
+|   103 | NILOY   | ENGINEER  | 7902 | 2025-07-27 | 1648.00 |  300.00 |     10 |
++-------+---------+-----------+------+------------+---------+---------+--------+
+	check whether you can roll back the contents.
+
+rollback to orignal emp table is not possible.
+
+14. create a procedure getMin(deptno,minsal) to find minimum salary of given table. 
+
+mysql> create procedure getMin(in dno int, out minsal float)
+    -> begin
+    ->  select min(SAL) into minsal
+    ->  from emp
+    ->  where deptno = dno
+    ->  group by deptno;
+    ->
+    -> select dno, minsal;
+    -> end//
+
+mysql> call getMin(10,@minsal)//
